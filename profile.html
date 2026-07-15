@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - NeuroScan AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-light: #f8f9fa;
+            --nav-bg: #f1f3f5;
+            --primary-blue: #007bff;
+            --text-dark: #495057;
+            --input-border: #ced4da;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #334155;
+        }
+
+        /* --- NAVBAR STYLES --- */
+        .navbar {
+            background-color: var(--nav-bg);
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: var(--text-dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .nav-link-custom:hover { color: var(--primary-blue); }
+        .active-nav { color: var(--primary-blue) !important; font-weight: 700; }
+
+        /* --- PROFILE CARD STYLES --- */
+        .main-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+            border: 1px solid #f1f5f9;
+        }
+
+        .profile-pic-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .profile-pic-container:hover { transform: scale(1.02); }
+
+        .profile-pic-border {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--primary-blue);
+            padding: 4px;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--primary-blue);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            font-size: 0.8rem;
+        }
+
+        .btn-action {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-action:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-action:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .info-section {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        /* Modal Animation */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-alert {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .error-alert {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        /* Live Indicator Animation from Canvas */
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #bbf7d0;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- DATA BRIDGE -->
+    <!-- These values are populated from the backend when the page is served -->
+    <input type="hidden" id="session-username" value="{{ user.username if user else session.get('username', 'Aman') }}">
+    <input type="hidden" id="session-email" value="{{ user.email if user else session.get('user_email', 'tabhay0055@gmail.com') }}">
+    <input type="hidden" id="session-about" value="{{ user.about_me if user and user.about_me else 'Add some information about yourself' }}">
+    <input type="hidden" id="session-pic" value="{{ user.profile_pic if user and user.profile_pic else '' }}">
+
+    <!-- Status Alert Notification -->
+    <div class="status-alert" id="statusAlert">
+        Action completed successfully!
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-100 cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_dashboard_page') if url_for is defined else '#' }}" class="nav-link-custom">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{{ url_for('detection_page') if url_for is defined else '#' }}" class="nav-link-custom">
+                    <i class="fas fa-brain"></i> Predict
+                </a>
+                <a href="{{ url_for('serve_about_page') if url_for is defined else '#' }}" class="nav-link-custom">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+                <a href="{{ url_for('serve_profile_page') if url_for is defined else '#' }}" class="nav-link-custom active-nav">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="live-pill">
+                <span class="pulse-dot"></span> LIVE SYNC
+            </div>
+            <button onclick="handleLogout()" class="text-slate-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12 max-w-4xl">
+        <div class="main-card">
+            <!-- User Header -->
+            <div class="flex flex-col items-center text-center mb-8">
+                <div class="profile-pic-container mb-6" onclick="document.getElementById('imageInput').click()">
+                    <div class="profile-pic-border">
+                        <img id="profilePreview" src="https://images.unsplash.com/vector-1742875355318-00d715aec3e8?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDM2fHx8ZW58MHx8fHx8"
+                             class="w-full h-full object-cover rounded-full">
+                    </div>
+                    <div class="camera-overlay"><i class="fas fa-camera"></i></div>
+                    <input type="file" id="imageInput" class="hidden" accept="image/*" onchange="previewImage(event)">
+                </div>
+
+                <h2 id="userNameDisplay" class="text-3xl font-extrabold text-slate-800 mb-1">Aman</h2>
+                <p id="userEmailDisplay" class="text-slate-500 font-medium mb-8">tabhay0055@gmail.com</p>
+
+                <div class="flex flex-wrap gap-4 w-full md:w-auto">
+                    <button onclick="openModal('editModal')" class="btn-action shadow-md px-10">
+                        <i class="fas fa-user-edit mr-2"></i> Edit Profile
+                    </button>
+                    <button onclick="openModal('pwModal')" class="btn-action shadow-md px-10">
+                        <i class="fas fa-key mr-2"></i> Change Password
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full space-y-4">
+                <div class="info-section">
+                    <h3 class="section-title">About Me</h3>
+                    <p id="aboutMeDisplay" class="text-slate-500 text-sm">Add some information about yourself</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODALS -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 text-slate-800">Edit Profile</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Display Name</label>
+                    <input type="text" id="editNameInput" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">About Me</label>
+                    <textarea id="editAboutInput" rows="4" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button id="saveProfileBtn" onclick="saveProfile()" class="btn-action flex-1">Save Changes</button>
+                    <button onclick="closeModal('editModal')" class="flex-1 bg-slate-100 font-bold rounded-lg text-slate-600 border-none cursor-pointer">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pwModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 text-slate-800">Change Password</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">New Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button id="updatePwBtn" onclick="changePassword()" class="btn-action flex-1">Update Password</button>
+                    <button onclick="closeModal('pwModal')" class="flex-1 bg-slate-100 font-bold rounded-lg text-slate-600 border-none cursor-pointer">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        // 1. Image Preview & Database Upload
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const base64Image = reader.result;
+                document.getElementById('profilePreview').src = base64Image;
+
+                // Upload to database immediately
+                try {
+                    const response = await fetch("/api/upload-profile-pic", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64Image })
+                    });
+
+                    if (response.ok) {
+                        showStatus("Profile picture updated in database!");
+                    } else {
+                        showStatus("Failed to save picture to database.", true);
+                    }
+                } catch (err) {
+                    showStatus("Error uploading picture.", true);
+                }
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // 2. Modal Controls
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.style.display = 'flex';
+            if (id === 'editModal') {
+                document.getElementById('editNameInput').value = document.getElementById('userNameDisplay').innerText;
+                document.getElementById('editAboutInput').value = document.getElementById('aboutMeDisplay').innerText;
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // 3. Update Profile (username & about)
+        async function saveProfile() {
+            const btn = document.getElementById('saveProfileBtn');
+            const newName = document.getElementById('editNameInput').value.trim();
+            const newAbout = document.getElementById('editAboutInput').value.trim();
+
+            if (!newName) return showStatus("Name cannot be empty.", true);
+
+            btn.disabled = true;
+            btn.innerText = "Saving...";
+
+            try {
+                const response = await fetch("/api/update-profile", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: newName, about: newAbout })
+                });
+
+                if (response.ok) {
+                    document.getElementById('userNameDisplay').innerText = newName;
+                    document.getElementById('aboutMeDisplay').innerText = newAbout || "Add some information about yourself";
+                    closeModal('editModal');
+                    showStatus("Profile updated in database!");
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    showStatus(data.error || "Update failed.", true);
+                }
+            } catch (err) {
+                showStatus("Network error. Verify server is running.", true);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Save Changes";
+            }
+        }
+
+        // 4. Update Password
+        async function changePassword() {
+            const btn = document.getElementById('updatePwBtn');
+            const newPw = document.getElementById('newPassword').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+
+            if (!newPw || !confirmPw) {
+                showStatus("Please fill in all fields.", true);
+                return;
+            }
+
+            if (newPw !== confirmPw) {
+                showStatus("Passwords do not match!", true);
+                return;
+            }
+
+            if (newPw.length < 6) {
+                showStatus("Password must be at least 6 characters.", true);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            try {
+                const response = await fetch("/api/change-password", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        new_password: newPw
+                    })
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    closeModal('pwModal');
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    showStatus("Password updated in database!");
+                } else {
+                    showStatus(result.error || "Failed to update password.", true);
+                }
+            } catch (err) {
+                showStatus("Network error.", true);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Update Password";
+            }
+        }
+
+        // Utility: Show status alerts
+        function showStatus(msg, isError = false) {
+            const alert = document.getElementById('statusAlert');
+            alert.innerText = msg;
+            alert.style.display = 'block';
+
+            if (isError) {
+                alert.classList.add('error-alert');
+            } else {
+                alert.classList.remove('error-alert');
+            }
+
+            setTimeout(() => { alert.style.display = 'none'; }, 4000);
+        }
+
+        function handleLogout() {
+            if (confirm("Are you sure you want to log out?")) {
+                window.location.href = "{{ url_for('serve_login') if url_for is defined else '#' }}";
+            }
+        }
+
+        window.onload = function() {
+            const nameValue = document.getElementById('session-username').value;
+            const emailValue = document.getElementById('session-email').value;
+            const aboutValue = document.getElementById('session-about').value;
+            const picValue = document.getElementById('session-pic').value;
+
+            const bracketCheck = '{' + '{';
+
+            if (!nameValue.includes(bracketCheck)) {
+                document.getElementById('userNameDisplay').innerText = nameValue;
+            }
+            if (!emailValue.includes(bracketCheck)) {
+                document.getElementById('userEmailDisplay').innerText = emailValue;
+            }
+            if (!aboutValue.includes(bracketCheck) && aboutValue !== 'None' && aboutValue !== '') {
+                document.getElementById('aboutMeDisplay').innerText = aboutValue;
+            }
+            if (!picValue.includes(bracketCheck) && picValue !== 'None' && picValue !== '') {
+                document.getElementById('profilePreview').src = picValue;
+            }
+        };
+
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

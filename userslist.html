@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List - NeuroScan AI Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            color: #334155;
+        }
+
+        /* --- NAVBAR STYLES (EXACT MATCH FROM CANVAS) --- */
+        .navbar {
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: #495057;
+            font-weight: 500;
+            display: flex;
+            align-items: center; gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+        }
+
+        .nav-link-custom:hover { color: #007bff; }
+        .active-nav { color: #007bff !important; font-weight: 700; }
+
+        /* Live Indicator Animation from Canvas */
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #bbf7d0;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* --- TABLE STYLES --- */
+        .main-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 1px solid #e5e7eb;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            padding: 2.5rem;
+        }
+
+        .user-list-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1d4ed8;
+            margin-bottom: 2.5rem;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .custom-table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .custom-table th {
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 0.95rem;
+        }
+
+        .custom-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .profile-img-box {
+            width: 60px;
+            height: 60px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .btn-action-blue {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-action-blue:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-red {
+            background-color: #ef4444;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-red:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .sync-status-footer {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center; gap: 8px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- DATA BRIDGE -->
+    <script id="initial-users" type="text/plain">{% if users_list %}{{ users_list | tojson | safe }}{% else %}[]{% endif %}</script>
+
+    <!-- Navigation matching exact feature from Canvas Admin Dashboard -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden border cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_admindashboard_page') }}" class="nav-link-custom"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="{{ url_for('serve_userlist_page') }}" class="nav-link-custom active-nav"><i class="fas fa-users"></i> User_lists</a>
+                <a href="{{ url_for('serve_admin_list_view') }}" class="nav-link-custom"><i class="fas fa-user-shield"></i> Admin_lists</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="live-pill">
+                <span class="pulse-dot"></span> LIVE SYNC
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/admin/login'" class="text-slate-400 hover:text-red-500">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-8 flex-grow w-full">
+
+        <div class="main-card">
+            <div class="table-container">
+                <h2 class="user-list-title">Clinical Personnel Management</h2>
+
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Profile Picture</th>
+                            <th>Deactivation</th>
+                            <th>Deletion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body">
+                        <tr><td colspan="6" class="text-center py-12 text-slate-400 italic">Initializing database connection...</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="sync-status-footer">
+                    <div class="pulse-dot"></div>
+                    <span id="sync-text">Live Sync Active • Refreshing every 30s</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        let currentUsers = [];
+
+        window.onload = async () => {
+            const raw = document.getElementById('initial-users').textContent.trim();
+            const jinjaStart = '{' + '{';
+
+            if (raw && !raw.includes(jinjaStart) && raw !== '[]') {
+                try {
+                    currentUsers = JSON.parse(raw);
+                    renderUserTable(currentUsers);
+                } catch (e) {
+                    console.error("Initial load parse error:", e);
+                    fetchLatestUsers();
+                }
+            } else {
+                fetchLatestUsers();
+            }
+
+            // Periodic Sync
+            setInterval(fetchLatestUsers, 30000);
+        };
+
+        async function fetchLatestUsers() {
+            try {
+                const response = await fetch('/api/admin/users-list');
+                if (!response.ok) throw new Error("API Offline");
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    currentUsers = data;
+                    renderUserTable(currentUsers);
+                    const syncText = document.getElementById('sync-text');
+                    if (syncText) syncText.innerText = "Registry Updated: " + new Date().toLocaleTimeString();
+                }
+            } catch (error) {
+                console.warn("API Connection Issue");
+                if (currentUsers.length === 0) renderEmptyState();
+            }
+        }
+
+        function renderUserTable(users) {
+            const tbody = document.getElementById('user-table-body');
+            if (!tbody) return;
+
+            if (users.length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => `
+                <tr id="user-row-${user.id}" class="transition-opacity duration-300">
+                    <td class="font-bold text-slate-500">#${user.id}</td>
+                    <td class="font-semibold text-slate-800">${user.username || 'Unknown'}</td>
+                    <td class="text-slate-600 font-medium">${user.email}</td>
+                    <td>
+                        <div class="profile-img-box">
+                            ${user.profile_pic
+                                ? `<img src="${user.profile_pic}" class="w-full h-full object-cover">`
+                                : `<span class="text-[10px] text-slate-400 uppercase font-bold text-center">No Pic</span>`}
+                        </div>
+                    </td>
+                    <td>
+                        <button onclick="deactivateUser(${user.id})" class="btn-action-blue">
+                           <i class="fas fa-user-slash mr-2"></i>Deactivate
+                        </button>
+                    </td>
+                    <td>
+                        <button onclick="deleteUser(${user.id})" class="btn-red">
+                           <i class="fas fa-trash-alt mr-2"></i>Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderEmptyState() {
+            const tbody = document.getElementById('user-table-body');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-400 italic">No users found. Ensure database is initialized.</td></tr>`;
+            }
+        }
+
+        async function deactivateUser(userId) {
+            if (confirm(`Are you sure you want to deactivate User ID #${userId}? Access will be restricted.`)) {
+                await performAction(userId, 'DELETE');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (confirm(`PERMANENT DELETE: Remove user #${userId} from system entirely?`)) {
+                await performAction(userId, 'DELETE');
+            }
+        }
+
+        async function performAction(userId, method) {
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/delete`, {
+                    method: method
+                });
+
+                if (response.ok) {
+                    const row = document.getElementById(`user-row-${userId}`);
+                    if (row) {
+                        row.style.opacity = '0';
+                        setTimeout(() => fetchLatestUsers(), 300);
+                    }
+                } else {
+                    const err = await response.json();
+                    alert("Server Error: " + (err.error || "Action failed"));
+                }
+            } catch (e) {
+                alert("Network failure. Check Flask logs.");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NeuroScan AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            color: #334155;
+        }
+
+        /* --- NAVBAR STYLES --- */
+        .navbar {
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: #495057;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+        }
+
+        .nav-link-custom:hover { color: #007bff; }
+        .active-nav { color: #007bff !important; font-weight: 700; }
+
+        /* --- CARD STYLES --- */
+        .glass-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+            min-height: 350px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .btn-blue {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-blue:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        }
+
+        .stat-label { color: #64748b; font-size: 0.875rem; font-weight: 500; }
+        .stat-value { color: #1e293b; font-size: 1.75rem; font-weight: 800; margin-top: 2px; }
+
+        .section-header {
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #1e293b;
+        }
+
+        /* Live Indicator Animation */
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #bbf7d0;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- DATA BRIDGE: Hidden inputs bridge Flask values to Javascript securely -->
+    <!-- FIXED: Simplified filter logic for best compatibility -->
+    <div id="flask-bridge" style="display: none;">
+        <input type="hidden" id="db-total-users" value="{{ total_users | default(0) }}">
+        <input type="hidden" id="db-active-users" value="{{ active_users | default(0) }}">
+        <input type="hidden" id="db-new-users" value="{{ new_users_30 | default(0) }}">
+        <input type="hidden" id="db-total-scans" value="{{ total_scans | default(0) }}">
+
+        <input type="hidden" id="db-glioma" value="{% if dist_stats %}{{ dist_stats.glioma or 0 }}{% else %}0{% endif %}">
+        <input type="hidden" id="db-meningioma" value="{% if dist_stats %}{{ dist_stats.meningioma or 0 }}{% else %}0{% endif %}">
+        <input type="hidden" id="db-no-tumor" value="{% if dist_stats %}{{ dist_stats.no_tumor or 0 }}{% else %}0{% endif %}">
+        <input type="hidden" id="db-pituitary" value="{% if dist_stats %}{{ dist_stats.pituitary or 0 }}{% else %}0{% endif %}">
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden border cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_admin_dashboard') }}" class="nav-link-custom active-nav"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="{{ url_for('serve_userlist_page') }}" class="nav-link-custom"><i class="fas fa-users"></i> User_lists</a>
+                <a href="{{ url_for('serve_admin_list_view') }}" class="nav-link-custom"><i class="fas fa-user-shield"></i> Admin_lists</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="live-pill">
+                <span class="pulse-dot"></span> LIVE SYNC
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/admin/login'" class="text-slate-400 hover:text-red-500">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-8 flex-grow w-full">
+
+        <!-- Dashboard Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start mb-12 gap-4">
+            <div>
+                <h2 class="text-4xl font-extrabold text-slate-800 tracking-tight">Admin Dashboard</h2>
+                <p class="text-slate-500 font-medium mt-1">Real-time system monitoring and database analysis</p>
+            </div>
+            <!-- Main Trigger Button -->
+            <button class="btn-blue shadow-lg shadow-blue-100" id="openAdminModal">
+                <i class="fas fa-user-plus mr-2"></i> Create a New Admin
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- System Overview Card -->
+            <div class="glass-card p-8">
+                <h3 class="section-header">System Overview</h3>
+                <div class="grid grid-cols-2 gap-y-10">
+                    <div>
+                        <p class="stat-label">Total Users</p>
+                        <p id="ui-total-users" class="stat-value text-blue-600">0</p>
+                    </div>
+                    <div>
+                        <p class="stat-label">Active Users</p>
+                        <p id="ui-active-users" class="stat-value text-blue-600">0</p>
+                    </div>
+                    <div>
+                        <p class="stat-label">Inactive Users</p>
+                        <p id="ui-inactive-users" class="stat-value">0</p>
+                    </div>
+                    <div>
+                        <p class="stat-label">New Users (30 Days)</p>
+                        <p id="ui-new-users" class="stat-value text-green-500">+0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Performance Card -->
+            <div class="glass-card p-8">
+                <h3 class="section-header">Model Performance</h3>
+                <div class="grid grid-cols-2 gap-y-10">
+                    <div>
+                        <p class="stat-label">Accuracy</p>
+                        <p class="stat-value text-green-600">94.60%</p>
+                    </div>
+                    <div>
+                        <p class="stat-label">Precision</p>
+                        <p class="stat-value">96.20%</p>
+                    </div>
+                    <div>
+                        <p class="stat-label">Recall</p>
+                        <p class="stat-value">93.50%</p>
+                    </div>
+                    <div>
+                        <p class="stat-label">F1-Score</p>
+                        <p class="stat-value">94.80%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnostic Distribution Card -->
+            <div class="glass-card p-8 flex flex-col">
+                <h3 class="section-header">Diagnostic Distribution</h3>
+                <div class="flex-grow relative min-h-[180px]">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+                <div class="mt-4 flex justify-center gap-4">
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase">
+                        <span class="w-2 h-2 rounded-full bg-[#3b82f6]"></span> Glioma
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase">
+                        <span class="w-2 h-2 rounded-full bg-[#10b981]"></span> Mening
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase">
+                        <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Healthy
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- CREATE ADMIN MODAL -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-800">Add New System Admin</h3>
+                <button id="closeAdminModal" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="createAdminForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1">Full Name</label>
+                    <input type="text" id="adminName" name="name" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Doe">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1">Email Address</label>
+                    <input type="email" id="adminEmail" name="email" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin@neuroscan.ai">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1">Assigned Role</label>
+                    <select id="adminRole" name="role" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Standard Admin">Standard Admin</option>
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Data Analyst">Data Analyst</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1">Secure Password</label>
+                    <input type="password" id="adminPassword" name="password" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" id="submitAdmin" class="w-full btn-blue py-3 flex justify-center items-center gap-2">
+                        <span>Save Admin to Database</span>
+                        <i class="fas fa-lock ml-2"></i>
+                    </button>
+                </div>
+                <!-- Feedback area for backend errors -->
+                <p id="formFeedback" class="text-center text-sm mt-4 hidden font-semibold"></p>
+            </form>
+        </div>
+    </div>
+
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('adminModal');
+            const openBtn = document.getElementById('openAdminModal');
+            const closeBtn = document.getElementById('closeAdminModal');
+            const form = document.getElementById('createAdminForm');
+            const feedback = document.getElementById('formFeedback');
+            const submitBtn = document.getElementById('submitAdmin');
+
+            if (openBtn) openBtn.onclick = () => { modal.style.display = 'flex'; };
+            if (closeBtn) closeBtn.onclick = () => {
+                modal.style.display = 'none';
+                feedback.classList.add('hidden');
+                form.reset();
+            };
+
+            window.onclick = (e) => { if (e.target == modal) closeBtn.onclick(); };
+
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                feedback.classList.add('hidden');
+
+                const formData = {
+                    name: document.getElementById('adminName').value,
+                    email: document.getElementById('adminEmail').value,
+                    role: document.getElementById('adminRole').value,
+                    password: document.getElementById('adminPassword').value
+                };
+
+                try {
+                    const response = await fetch('/api/admin/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    // Parse JSON Safely
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch(e) {
+                        throw new Error("Server Error: Check backend console.");
+                    }
+
+                    if (response.ok) {
+                        showFeedback(result.message || "Admin added successfully!", "text-green-600");
+                        form.reset();
+                        setTimeout(() => { closeBtn.onclick(); }, 2000);
+                    } else {
+                        const errorMsg = result.error || `Error: ${response.status}`;
+                        showFeedback(errorMsg, "text-red-500");
+                    }
+                } catch (err) {
+                    console.error("Save Error:", err);
+                    showFeedback("Server connection failed. Is the backend running?", "text-red-500");
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            };
+
+            function showFeedback(msg, colorClass) {
+                feedback.innerText = msg;
+                feedback.className = `text-center text-sm mt-4 font-semibold ${colorClass}`;
+                feedback.classList.remove('hidden');
+            }
+        });
+
+        // --- Analytics & Chart ---
+        let distChart;
+
+        function getBridgeValue(id, fallback = 0) {
+            const el = document.getElementById(id);
+            if (!el) return fallback;
+            const val = el.value.trim();
+            // FIXED: Using Unicode escape sequences for curly braces to bypass Jinja parser scanner
+            if (val === "" || val.indexOf("\u007B\u007B") !== -1) return fallback;
+            return isNaN(val) ? val : parseInt(val);
+        }
+
+        async function refreshStats() {
+            try {
+                const response = await fetch('/api/admin/stats');
+                if (!response.ok) return;
+                const data = await response.json();
+
+                document.getElementById('ui-total-users').innerText = data.total_users;
+                document.getElementById('ui-active-users').innerText = data.active_users;
+                document.getElementById('ui-inactive-users').innerText = data.inactive_users;
+                document.getElementById('ui-new-users').innerText = "+" + (data.new_users_30 || 0);
+
+                if (distChart) {
+                    distChart.data.datasets[0].data = [
+                        data.dist.glioma || 0,
+                        data.dist.meningioma || 0,
+                        data.dist.no_tumor || 0,
+                        data.dist.pituitary || 0
+                    ];
+                    distChart.update();
+                }
+            } catch (e) {}
+        }
+
+        window.onload = () => {
+            const total = getBridgeValue('db-total-users');
+            const active = getBridgeValue('db-active-users');
+            const newU = getBridgeValue('db-new-users');
+
+            document.getElementById('ui-total-users').innerText = total;
+            document.getElementById('ui-active-users').innerText = active;
+            document.getElementById('ui-inactive-users').innerText = Math.max(0, total - active);
+            document.getElementById('ui-new-users').innerText = "+" + newU;
+
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            const g = getBridgeValue('db-glioma');
+            const m = getBridgeValue('db-meningioma');
+            const n = getBridgeValue('db-no-tumor');
+            const p = getBridgeValue('db-pituitary');
+
+            const hasData = (g + m + n + p) > 0;
+
+            distChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Glioma', 'Meningioma', 'Healthy', 'Pituitary'],
+                    datasets: [{
+                        data: hasData ? [g, m, n, p] : [10, 15, 25, 8],
+                        backgroundColor: hasData ? ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'] : ['#f1f5f9', '#f1f5f9', '#f1f5f9', '#f1f5f9'],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '78%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            setInterval(refreshStats, 30000);
+            if(total === 0) refreshStats();
+        };
+    </script>
+</body>
+</html>

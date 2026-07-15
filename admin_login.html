@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - NeuroScan AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            color: #334155;
+        }
+
+        /* --- NAVBAR STYLES --- */
+        .navbar {
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: #495057;
+            font-weight: 500;
+            display: flex;
+            align-items: center; gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+        }
+
+        .nav-link-custom:hover { color: #007bff; }
+        .active-nav { color: #007bff !important; font-weight: 700; }
+
+        /* --- AUTH CARD STYLES --- */
+        .auth-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            max-width: 450px;
+            width: 100%;
+            border: 1px solid #f1f5f9;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .underline-input {
+            border: none;
+            border-bottom: 1px solid #ced4da;
+            border-radius: 0;
+            padding: 12px 0;
+            width: 100%;
+            transition: border-color 0.2s;
+            background: transparent;
+            font-size: 1rem;
+        }
+
+        .underline-input:focus {
+            outline: none;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .btn-blue {
+            background-color: #007bff;
+            color: white;
+            transition: all 0.2s;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+
+        .btn-blue:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-blue:disabled {
+            background-color: #007bff; /* Kept blue as per "stay same" request */
+            cursor: default;
+        }
+
+        /* --- Status Message Styling --- */
+        #status-message {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .msg-success { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .msg-error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .hidden { display: none; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden border cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_home_page') }}" class="nav-link-custom"><i class="fas fa-home"></i> Home</a>
+                <a href="{{ url_for('serve_about_page') }}" class="nav-link-custom"><i class="fas fa-info-circle"></i> About</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('serve_admin_login') }}" class="nav-link-custom active-nav"><i class="fas fa-sign-in-alt"></i> Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Section -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="auth-card p-10 md:p-12">
+
+            <!-- Feedback Message Container moved above the title -->
+            <div id="status-message" class="hidden"></div>
+
+            <h2 class="text-3xl font-extrabold text-slate-800 text-center mb-10">Welcome Back Admin</h2>
+
+            <form id="admin-login-form">
+                <div class="input-group">
+                    <input type="email" id="adminEmail" class="underline-input" placeholder="Admin Email" required autocomplete="email">
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="adminPassword" class="underline-input" placeholder="Password" required autocomplete="current-password">
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" id="btn-admin-login" class="btn-blue w-full py-3 shadow-md shadow-blue-100 uppercase text-sm">
+                        Verify & Log In
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        const statusMsg = document.getElementById('status-message');
+
+        function showMessage(text, type = 'success') {
+            statusMsg.textContent = text;
+            statusMsg.className = `msg-${type}`;
+            statusMsg.classList.remove('hidden');
+        }
+
+        // Form Submission logic
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('btn-admin-login');
+
+            // Reset UI
+            statusMsg.classList.add('hidden');
+            btn.disabled = true;
+            // Button text stays "Verify & Log In" as requested
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success message above the header
+                    showMessage('Admin Login Successfull!', 'success');
+
+                    // Button stays exactly the same
+                    btn.textContent = "Verify & Log In";
+
+                    // Delay for redirection
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard';
+                    }, 1500);
+                } else {
+                    showMessage(data.error || "Access Denied: Invalid Credentials", 'error');
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showMessage("Server Connection Error. Please ensure Flask is running.", 'error');
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

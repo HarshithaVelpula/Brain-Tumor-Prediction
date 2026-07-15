@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Prediction App</title>
+    <!-- Tailwind CSS for modern layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            background-color: #f8f9fa; /* Light gray background like the screenshot */
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            margin: 0;
+        }
+
+        /* --- UPDATED NAVBAR STYLES MATCHED TO CANVAS --- */
+        .navbar {
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: #495057;
+            font-weight: 500;
+            display: flex;
+            align-items: center; gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+        }
+
+        .nav-link-custom:hover { color: #007bff; }
+        .active-nav { color: #007bff !important; font-weight: 700; }
+
+        .btn-blue {
+            background-color: #1d4ed8;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-blue:hover {
+            background-color: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        .logo-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- UPDATED Top Navigation Bar MATCHED TO CANVAS -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <!-- Brain Logo -->
+            <div class="w-12 h-12 rounded-full overflow-hidden border cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <!-- Home and About on the Left Side as requested -->
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_home_page') }}" class="nav-link-custom active-nav">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{{ url_for('serve_aboutt_page') }}" class="nav-link-custom">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+            </div>
+        </div>
+
+        <!-- Right side login and register links -->
+        <div class="flex items-center gap-4">
+            <a href="{{ url_for('serve_login') }}" class="nav-link-custom">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
+            <a href="{{ url_for('serve_login') }}" class="nav-link-custom">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow bg-white mx-auto w-full max-w-6xl shadow-sm flex flex-col items-center justify-center p-8">
+
+        <!-- Central Brain Illustration -->
+        <div class="mb-6">
+            <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg"
+                 alt="Brain Tumor Prediction App"
+                 class="logo-circle">
+        </div>
+
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Brain Tumor Prediction App</h2>
+        <p class="text-gray-500 text-center max-w-lg mb-8 font-medium">
+            Scan MRI results to find the probability of a tumor using our AI-powered application
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4">
+            <a href="/login" class="btn-blue px-10 py-2 rounded-md font-bold text-sm uppercase tracking-wide shadow-md">
+                <i class="fas fa-user"></i> User
+            </a>
+            <a href="{{ url_for('serve_admin_login') }}" class="btn-blue px-10 py-2 rounded-md font-bold text-sm uppercase tracking-wide shadow-md">
+                <i class="fas fa-user-shield"></i> Admin
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-90 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,815 @@
+/* ======================== ROOT & VARIABLES ======================== */
+:root {
+    --primary-color: #2563eb;
+    --primary-dark: #1e40af;
+    --primary-light: #3b82f6;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* ======================== GLOBAL STYLES ======================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+/* ======================== CONTAINER ======================== */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ======================== HEADER ======================== */
+.header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 2rem 1rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.brain-icon {
+    width: 48px;
+    height: 48px;
+    stroke: white;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* ======================== MAIN CONTENT ======================== */
+.main-content {
+    flex: 1;
+    padding: 2rem 1rem;
+}
+
+.content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+    .content-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ======================== CARD ======================== */
+.card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.card h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+/* ======================== UPLOAD AREA ======================== */
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--bg-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-light);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(59, 130, 246, 0.05));
+}
+
+.upload-area.dragover {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.1));
+}
+
+.upload-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--primary-light);
+    margin-bottom: 1rem;
+}
+
+.upload-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ======================== FILE INFO ======================== */
+.file-info {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.file-info.hidden {
+    display: none;
+}
+
+.file-info p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ======================== BUTTONS ======================== */
+.btn-primary, .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+}
+
+.btn-loader {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.btn-loader.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ======================== INFO BOX ======================== */
+.info-box {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(59, 130, 246, 0.05));
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.info-box h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.info-box ul {
+    list-style: none;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.info-box li {
+    padding: 0.25rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.info-box li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+/* ======================== RESULTS CONTAINER ======================== */
+.results-container {
+    display: block;
+}
+
+.results-container.hidden {
+    display: none;
+}
+
+/* ======================== RESULT BOX ======================== */
+.result-box {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.result-box:last-child {
+    margin-bottom: 0;
+}
+
+.prediction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.prediction-header h3 {
+    margin: 0;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+}
+
+/* ======================== PREDICTION RESULT ======================== */
+.prediction-result {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.class-badge {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
+}
+
+.class-badge.glioma_tumor {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.class-badge.meningioma_tumor {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.class-badge.no_tumor {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.class-badge.pituitary_tumor {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+/* ======================== CONFIDENCE METER ======================== */
+.confidence-meter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.confidence-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.confidence-value {
+    color: var(--primary-color);
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-light), var(--primary-dark));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* ======================== CONFIDENCE SCORES ======================== */
+.confidence-scores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .confidence-scores {
+        grid-template-columns: 1fr;
+    }
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.score-item-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.score-item-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 50px;
+    text-align: right;
+}
+
+/* ======================== GRADCAM VISUALIZATION ======================== */
+.xai-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(37, 99, 235, 0.05);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+}
+
+.gradcam-container {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.gradcam-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ======================== RESULT ACTIONS ======================== */
+.result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .result-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ======================== EMPTY STATE ======================== */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--border-color);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 1rem;
+}
+
+/* ======================== LOADING STATE ======================== */
+.loading-state {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.loading-state.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.progress-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    animation: pulse 1.4s infinite;
+}
+
+.progress-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.progress-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+    0%, 80%, 100% { opacity: 0.5; }
+    40% { opacity: 1; }
+}
+
+/* ======================== ERROR STATE ======================== */
+.error-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+.error-state.hidden {
+    display: none;
+}
+
+.error-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+}
+
+#errorMessage {
+    font-size: 0.95rem;
+    color: var(--danger-color);
+    margin: 1rem 0;
+}
+
+/* ======================== FOOTER ======================== */
+.footer {
+    background: linear-gradient(135deg, var(--text-primary) 0%, #1e293b 100%);
+    color: white;
+    text-align: center;
+    padding: 2rem 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.footer p {
+    margin: 0;
+}
+
+/* ======================== TOAST NOTIFICATION ======================== */
+.toast {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    transition: bottom 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    bottom: 2rem;
+}
+
+.toast.success {
+    background: var(--success-color);
+}
+
+.toast.error {
+    background: var(--danger-color);
+}
+
+.toast.warning {
+    background: var(--warning-color);
+}
+
+/* ======================== ANIMATIONS ======================== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-box {
+    animation: slideIn 0.5s ease;
+}
+
+/* ======================== RESPONSIVE DESIGN ======================== */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .upload-area {
+        padding: 2rem 1rem;
+    }
+
+    .upload-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* ======================== ACCESSIBILITY ======================== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+button:focus,
+input:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ======================== TUMOR INFO SECTION ======================== */
+.tumor-info-box {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(168, 85, 247, 0.05));
+    border-left: 4px solid #8b5cf6;
+}
+
+.tumor-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.tumor-info-section {
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.tumor-info-section h4 {
+    color: #8b5cf6;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tumor-info-section ul,
+.tumor-info-section ol {
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.9rem;
+}
+
+.tumor-info-section li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.tumor-info-section li:before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #8b5cf6;
+    font-weight: bold;
+}
+
+.tumor-description {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1));
+    border-radius: 8px;
+    border-left: 3px solid #8b5cf6;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.severity-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.severity-high {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.severity-medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.severity-low {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.severity-none {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.urgency-badge {
+    display: inline-block;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 700;
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.urgency-immediate {
+    background: rgba(239, 68, 68, 0.2);
+    color: #991b1b;
+    border: 2px solid #ef4444;
+}
+
+.urgency-urgent {
+    background: rgba(245, 158, 11, 0.2);
+    color: #92400e;
+    border: 2px solid #f59e0b;
+}
+
+.urgency-none {
+    background: rgba(16, 185, 129, 0.2);
+    color: #065f46;
+    border: 2px solid #10b981;
+}
+
+.prognosis-section {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(96, 165, 250, 0.05));
+    padding: 1.25rem;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+    font-style: italic;
+    color: var(--text-primary);
+}
+

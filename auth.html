@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - Brain Tumor Prediction App</title>
+    <!-- Tailwind CSS for layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-light: #f8f9fa;
+            --primary-blue: #007bff;
+            --text-dark: #495057;
+            --input-border: #ced4da;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            margin: 0;
+        }
+
+        /* --- UPDATED NAVBAR STYLES MATCHED TO CANVAS --- */
+        .navbar {
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: #495057;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+            cursor: pointer;
+        }
+
+        .nav-link-custom:hover { color: #007bff; }
+        .active-nav { color: #007bff !important; font-weight: 700; }
+
+        .auth-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            max-width: 450px;
+            width: 100%;
+            transition: all 0.3s ease;
+            border: 1px solid #f1f5f9;
+        }
+
+        .underline-input {
+            border: none;
+            border-bottom: 1px solid var(--input-border);
+            border-radius: 0;
+            padding: 10px 0;
+            width: 100%;
+            transition: border-color 0.2s;
+            background: transparent;
+        }
+
+        .underline-input:focus {
+            outline: none;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .btn-blue {
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.2s;
+            border-radius: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-blue:hover { background-color: #0056b3; transform: translateY(-1px); }
+        .btn-blue:disabled { background-color: #cbd5e0; cursor: not-allowed; }
+
+        .toggle-btn { color: #6366f1; font-weight: 600; cursor: pointer; }
+        .toggle-btn:hover { text-decoration: underline; }
+
+        .hidden { display: none; }
+
+        .auth-title { color: #1e293b; font-weight: 800; }
+
+        /* OTP Input Styling */
+        .otp-box {
+            width: 45px;
+            height: 55px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+            background: white;
+        }
+        .otp-box:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .otp-box.error { border-color: #ef4444 !important; color: #ef4444; }
+        .otp-box.success { border-color: #10b981 !important; color: #10b981; }
+
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        #status-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .msg-success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .msg-error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .msg-info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- UPDATED Top Navigation Bar MATCHED TO CANVAS -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <!-- Brain Logo -->
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-100 cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <!-- Left Navigation -->
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_home_page') }}" class="nav-link-custom">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{{ url_for('serve_aboutt_page') }}" class="nav-link-custom">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Navigation -->
+        <div class="hidden md:flex items-center gap-4">
+            <a onclick="toggleAuth('register')" class="nav-link-custom" id="nav-reg">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
+            <a onclick="toggleAuth('login')" class="nav-link-custom" id="nav-login">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Section -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="auth-card p-10 md:p-12">
+
+            <div id="status-message" class="hidden"></div>
+
+            <!-- Register Form -->
+            <div id="register-container">
+                <h2 class="text-3xl auth-title text-center mb-10">Create Account</h2>
+                <form id="register-form" class="space-y-8">
+                    <input type="text" id="reg-username" class="underline-input" placeholder="Username" required>
+                    <input type="email" id="reg-email" class="underline-input" placeholder="Email" required>
+                    <input type="password" id="reg-password" class="underline-input" placeholder="Password" required>
+                    <div class="pt-4">
+                        <button type="submit" id="btn-send-otp" class="btn-blue w-full py-2.5 shadow-md text-sm uppercase tracking-wider">
+                            Send OTP
+                        </button>
+                    </div>
+                    <div class="text-center text-sm pt-4">
+                        <span class="text-gray-500">Already have an account?</span>
+                        <span class="toggle-btn ml-1" onclick="toggleAuth('login')">Log In</span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- OTP Verification View -->
+            <div id="otp-container" class="hidden">
+                <h2 class="text-3xl auth-title text-center mb-4">Verify Email</h2>
+                <p class="text-gray-500 text-center text-sm mb-8">We've sent a code to <br><span id="target-email" class="font-bold text-gray-700"></span></p>
+                <form id="otp-form" class="space-y-8">
+                    <div class="flex justify-between" id="otp-inputs">
+                        <input type="text" maxlength="1" class="otp-box" data-index="0" autocomplete="off">
+                        <input type="text" maxlength="1" class="otp-box" data-index="1" autocomplete="off">
+                        <input type="text" maxlength="1" class="otp-box" data-index="2" autocomplete="off">
+                        <input type="text" maxlength="1" class="otp-box" data-index="3" autocomplete="off">
+                        <input type="text" maxlength="1" class="otp-box" data-index="4" autocomplete="off">
+                        <input type="text" maxlength="1" class="otp-box" data-index="5" autocomplete="off">
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" id="btn-verify-otp" class="btn-blue w-full py-2.5 shadow-md text-sm uppercase tracking-wider">
+                            Verify & Complete
+                        </button>
+                    </div>
+                    <div class="text-center text-sm">
+                        <span class="toggle-btn" onclick="toggleAuth('register')">Back to Registration</span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-container" class="hidden">
+                <h2 class="text-3xl auth-title text-center mb-4">Welcome Back</h2>
+                <p class="text-gray-500 text-center text-sm mb-10">Please log in to access this page.</p>
+                <form id="login-form" class="space-y-8">
+                    <input type="email" id="login-email" class="underline-input" placeholder="Email" required>
+                    <input type="password" id="login-password" class="underline-input" placeholder="Password" required>
+                    <div class="pt-4">
+                        <button type="submit" id="btn-login" class="btn-blue w-full py-2.5 shadow-md text-sm uppercase tracking-wider">
+                            Log In
+                        </button>
+                    </div>
+                    <div class="text-center text-sm pt-4">
+                        <span class="text-gray-500">New user?</span>
+                        <span class="toggle-btn ml-1" onclick="toggleAuth('register')">Create an account</span>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        const statusMsg = document.getElementById('status-message');
+        const otpInputsWrapper = document.getElementById('otp-inputs');
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        const btnVerify = document.getElementById('btn-verify-otp');
+
+        let currentEmail = "";
+        let isVerifying = false;
+
+        function showMessage(text, type = 'success') {
+            statusMsg.textContent = text;
+            statusMsg.className = `msg-${type}`;
+            statusMsg.classList.remove('hidden');
+            setTimeout(() => statusMsg.classList.add('hidden'), 6000);
+        }
+
+        function toggleAuth(mode) {
+            const views = {
+                login: document.getElementById('login-container'),
+                register: document.getElementById('register-container'),
+                otp: document.getElementById('otp-container')
+            };
+            const navs = {
+                login: document.getElementById('nav-login'),
+                register: document.getElementById('nav-reg')
+            };
+
+            Object.values(views).forEach(v => v.classList.add('hidden'));
+            Object.values(navs).forEach(n => n.classList.remove('active-nav'));
+
+            views[mode === 'otp' ? 'otp' : mode].classList.remove('hidden');
+
+            // Adjust navigation active classes to match Canvas Dashboard logic
+            if (mode === 'login' || mode === 'register') {
+                navs[mode].classList.add('active-nav');
+            } else if (mode === 'otp') {
+                navs.register.classList.add('active-nav');
+            }
+
+            if (mode === 'otp') {
+                otpBoxes.forEach(b => b.value = '');
+                otpBoxes[0].focus();
+            }
+        }
+
+        // OTP Input Navigation Logic
+        otpBoxes.forEach((box, idx) => {
+            box.addEventListener('input', (e) => {
+                if (e.target.value && idx < 5) otpBoxes[idx + 1].focus();
+                const code = Array.from(otpBoxes).map(b => b.value).join('');
+                if (code.length === 6 && !isVerifying) verifyRegistration(code);
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && idx > 0) otpBoxes[idx - 1].focus();
+            });
+        });
+
+        // 1. Send OTP Logic
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                username: document.getElementById('reg-username').value,
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value
+            };
+            const btn = document.getElementById('btn-send-otp');
+            btn.disabled = true;
+            btn.textContent = "Processing...";
+
+            try {
+                const res = await fetch('/api/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    currentEmail = payload.email;
+                    document.getElementById('target-email').textContent = currentEmail;
+                    showMessage('Verification code sent to your email!', 'info');
+                    toggleAuth('otp');
+                } else {
+                    showMessage(data.error || 'Failed to send OTP', 'error');
+                }
+            } catch (err) { showMessage('Connection error. Is backend running?', 'error'); }
+            finally { btn.disabled = false; btn.textContent = "Send OTP"; }
+        });
+
+        // 2. Verification Logic
+        async function verifyRegistration(otp) {
+            isVerifying = true;
+            btnVerify.disabled = true;
+            btnVerify.textContent = "Verifying...";
+
+            try {
+                const res = await fetch('/api/verify-registration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail, otp: otp })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    otpBoxes.forEach(b => b.classList.add('success'));
+                    showMessage('Email verified! Redirecting to login...', 'success');
+                    setTimeout(() => toggleAuth('login'), 2500);
+                } else {
+                    otpInputsWrapper.classList.add('shake');
+                    otpBoxes.forEach(b => { b.classList.add('error'); b.value = ''; });
+                    showMessage(data.error || 'Invalid Code', 'error');
+                    setTimeout(() => {
+                        otpInputsWrapper.classList.remove('shake');
+                        otpBoxes.forEach(b => b.classList.remove('error'));
+                        otpBoxes[0].focus();
+                    }, 1000);
+                }
+            } catch (err) { showMessage('Verification error', 'error'); }
+            finally { isVerifying = false; btnVerify.disabled = false; btnVerify.textContent = "Verify & Complete"; }
+        }
+
+        // 3. Login Logic
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true;
+            btn.textContent = "Logging in...";
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('login-email').value,
+                        password: document.getElementById('login-password').value
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showMessage('Login successful!', 'success');
+                    setTimeout(() => window.location.href = '/preview', 1000);
+                } else { showMessage(data.error || 'Login failed', 'error'); }
+            } catch (err) { showMessage('Connection error', 'error'); }
+            finally { btn.disabled = false; btn.textContent = "Log In"; }
+        });
+
+        window.onload = () => toggleAuth('register');
+    </script>
+</body>
+</html>

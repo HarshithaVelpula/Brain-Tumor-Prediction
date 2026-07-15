@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Brain Tumor Prediction App</title>
+    <!-- Tailwind CSS for modern layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-light: #f8f9fa;
+            --nav-bg: #f1f3f5;
+            --primary-blue: #007bff;
+            --text-dark: #495057;
+            --input-border: #ced4da;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            margin: 0;
+        }
+
+        /* --- UPDATED NAVBAR STYLES MATCHED TO CANVAS --- */
+        .navbar {
+            background-color: var(--nav-bg);
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: var(--text-dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+            cursor: pointer;
+        }
+
+        .nav-link-custom:hover { color: var(--primary-blue); }
+        .active-nav { color: var(--primary-blue) !important; font-weight: 700; }
+
+        /* --- GLASS CARD STYLES MATCHED TO CANVAS --- */
+        .glass-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+            border: 1px solid #f1f5f9;
+        }
+
+        /* --- BUTTON STYLES MATCHED TO CANVAS --- */
+        .btn-blue {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-blue:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .team-img {
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            background-color: white;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+
+        /* Live Indicator Animation from Canvas */
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #bbf7d0;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar MATCHED TO CANVAS -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-100 cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="{{ url_for('serve_dashboard_page') }}" class="nav-link-custom">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{{ url_for('detection_page') }}" class="nav-link-custom">
+                    <i class="fas fa-brain"></i> Predict
+                </a>
+                <a href="{{ url_for('serve_about_page') }}" class="nav-link-custom active-nav">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+                <a href="{{ url_for('serve_profile_page') }}" class="nav-link-custom">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="live-pill">
+                <span class="pulse-dot"></span> LIVE SYNC
+            </div>
+            <button onclick="handleLogout()" class="text-slate-400 hover:text-red-500 transition-colors">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <h1 class="text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">About NeuroVision</h1>
+            <p class="text-xl text-slate-500 font-light">Advancing brain health through AI-powered tumor detection</p>
+        </div>
+
+        <!-- Mission Section -->
+        <div class="flex flex-col lg:flex-row items-center gap-12 mb-24">
+            <div class="w-full lg:w-1/2">
+                <div class="relative rounded-3xl overflow-hidden shadow-2xl group">
+                    <img
+                        src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop"
+                        alt="NeuroVision Dashboard"
+                        class="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                    >
+                    <div class="absolute inset-0 bg-blue-900/10 mix-blend-overlay"></div>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-1/2 glass-card p-10 lg:p-14">
+                <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center lg:text-left">Our Mission</h2>
+                <p class="text-slate-600 text-lg leading-relaxed text-center lg:text-left">
+                    At NeuroVision, we're dedicated to revolutionizing brain tumor detection through cutting-edge artificial intelligence.
+                    Our mission is to provide healthcare professionals with powerful, accurate, and easy-to-use tools that enhance patient care and improve outcomes.
+                </p>
+            </div>
+        </div>
+        <!-- Tumor Types Section -->
+        <div class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-slate-900 mb-4">Classification Scope</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto text-lg">Our deep learning model is trained to recognize the four primary categories found in neurological MRI diagnostics.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Glioma -->
+                <div class="glass-card flex gap-6 items-start p-8">
+                    <div class="bg-blue-50 p-4 rounded-2xl">
+                        <i class="fas fa-dna text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Glioma</h3>
+                        <p class="text-slate-600 leading-relaxed">Tumors that start in the glial cells (support cells) of the brain or spine. They are the most common type of primary brain tumor and can vary in aggressiveness.</p>
+                    </div>
+                </div>
+
+                <!-- Meningioma -->
+                <div class="glass-card flex gap-6 items-start p-8">
+                    <div class="bg-indigo-50 p-4 rounded-2xl">
+                        <i class="fas fa-layer-group text-indigo-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Meningioma</h3>
+                        <p class="text-slate-600 leading-relaxed">A tumor that arises from the meninges — the three layers of membrane that surround and protect the brain and spinal cord.</p>
+                    </div>
+                </div>
+
+                <!-- Pituitary -->
+                <div class="glass-card flex gap-6 items-start p-8">
+                    <div class="bg-purple-50 p-4 rounded-2xl">
+                        <i class="fas fa-brain text-purple-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Pituitary Tumor</h3>
+                        <p class="text-slate-600 leading-relaxed">Abnormal growths that develop in your pituitary gland. While most are noncancerous, they can affect hormone levels and put pressure on the brain.</p>
+                    </div>
+                </div>
+
+                <!-- No Tumor -->
+                <div class="glass-card flex gap-6 items-start p-8">
+                    <div class="bg-emerald-50 p-4 rounded-2xl">
+                        <i class="fas fa-check-circle text-emerald-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Healthy (No Tumor)</h3>
+                        <p class="text-slate-600 leading-relaxed">The absence of any identifiable tumorous growths. Identifying healthy scans is crucial for reducing false positives in diagnostic workflows.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Features Section -->
+        <div class="mb-24">
+            <h2 class="text-4xl font-bold text-center text-slate-900 mb-12">What NeuroVision Does</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Advanced Detection -->
+                <div class="glass-card p-8 hover:translate-y-[-4px] transition-transform duration-300">
+                    <div class="mb-6">
+                        <i class="fas fa-microscope text-blue-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Advanced Detection</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        Utilizing state-of-the-art deep learning algorithms to identify and classify brain tumors with high accuracy.
+                    </p>
+                </div>
+
+                <!-- Precise Analysis -->
+                <div class="glass-card p-8 hover:translate-y-[-4px] transition-transform duration-300">
+                    <div class="mb-6">
+                        <i class="fas fa-chart-line text-blue-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Precise Analysis</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        Providing detailed reports and visualizations to assist in diagnosis and treatment planning.
+                    </p>
+                </div>
+
+                <!-- Rapid Results -->
+                <div class="glass-card p-8 hover:translate-y-[-4px] transition-transform duration-300">
+                    <div class="mb-6">
+                        <i class="fas fa-clock text-blue-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Rapid Results</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        Delivering fast and reliable results to support timely decision-making in critical situations.
+                    </p>
+                </div>
+
+                <!-- User-Friendly Interface -->
+                <div class="glass-card p-8 hover:translate-y-[-4px] transition-transform duration-300">
+                    <div class="mb-6">
+                        <i class="fas fa-user-md text-blue-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">User-Friendly Interface</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        Designed with healthcare professionals in mind, ensuring ease of use and seamless integration into existing workflows.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        function handleLogout() {
+            if (confirm("Are you sure you want to log out?")) {
+                window.location.href = "{{ url_for('serve_login') }}";
+            }
+        }
+    </script>
+
+</body>
+</html>

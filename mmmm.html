@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Detection System - XAI Analysis</title>
+    <!-- Tailwind CSS for layout assistance -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for supplemental icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #64748b;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #334155;
+        }
+
+        /* --- Reference Code Style Overrides --- */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brain-icon {
+            width: 32px;
+            height: 32px;
+            color: var(--primary);
+        }
+        .logo h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+        .subtitle {
+            color: var(--secondary);
+            font-size: 0.813rem;
+            font-weight: 500;
+        }
+
+        /* --- UI Components --- */
+        .card {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            padding: 1.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        }
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Sidebar / Upload MRI Image --- */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fafafa;
+        }
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: #f1f5f9;
+        }
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1.25rem;
+            color: #94a3b8;
+        }
+        .upload-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 800;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+        .btn-primary:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.8;
+        }
+
+        /* --- Result Analysis Panels --- */
+        .prediction-header-box {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 2.25rem 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+        }
+
+        .score-card {
+            background: #fff;
+            border: 1px solid #eef2f6;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .tumor-info-box {
+            border-left: 6px solid #8b5cf6;
+        }
+
+        .explanation-callout {
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            color: #1e40af;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .bullet-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+        .bullet-list li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-size: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .urgency-banner {
+            background-color: #ecfdf5;
+            border: 2px solid #10b981;
+            color: #065f46;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .custom-progress-container { height: 10px; background-color: #f1f5f9; border-radius: 999px; overflow: hidden; }
+        .custom-progress-fill { height: 100%; background-color: var(--primary); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* States */
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .hidden { display: none; }
+
+        .nav-links-desktop a {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--secondary);
+            padding: 0.5rem 1.25rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links-desktop a:hover { color: var(--primary); background: #f1f5f9; }
+        .nav-links-desktop a.active { color: var(--primary); background: #eff6ff; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <!-- Brain SVG from Reference -->
+                <svg class="brain-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 3c-1 0-2 1-2 2v2a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h.5M15 3c1 0 2 1 2 2v2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.5"></path>
+                    <ellipse cx="12" cy="16" rx="3" ry="2"></ellipse>
+                    <path d="M9 20c-1 0-2 1-2 2M15 20c1 0 2 1 2 2"></path>
+                </svg>
+                <div class="flex flex-col">
+                    <h1>Brain Tumor Detection</h1>
+                    <p class="subtitle hidden md:block">AI-Powered Explainable Diagnostics (Grad-CAM)</p>
+                </div>
+            </div>
+
+            <div class="hidden md:flex nav-links-desktop">
+                <a href="{{ url_for('serve_dashboard_page') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="{{ url_for('detection_page') }}" class="active"><i class="fas fa-search"></i> Predict</a>
+                <a href="{{ url_for('serve_about_page') }}"><i class="fas fa-info-circle"></i> About</a>
+                <a href="{{ url_for('serve_profile_page') }}"><i class="fas fa-user-circle"></i> Profile</a>
+            </div>
+
+            <div>
+                <button onclick="handleLogout()" class="w-10 h-10 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto px-8 py-10 w-full flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+            <!-- Left Sidebar: Upload MRI Image Section -->
+            <section class="lg:col-span-4 flex flex-col gap-6">
+                <div class="card h-full flex flex-col">
+                    <h2 class="uppercase text-xs tracking-widest text-slate-400 font-black mb-6">Upload MRI Image</h2>
+
+                    <!-- State 1: Upload Dropzone -->
+                    <div id="uploadView">
+                        <div class="upload-area group" id="uploadArea">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p class="upload-text">
+                                Drag and drop your MRI image here<br>
+                                <span class="text-blue-500 font-bold">or click to select</span>
+                            </p>
+                            <input type="file" id="fileInput" accept="image/*" hidden>
+                        </div>
+                    </div>
+
+                    <!-- State 2: Selected Image Preview (Matches image_599f25.png) -->
+                    <div id="previewView" class="hidden flex-grow">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-slate-100 border-2 border-slate-200 shadow-inner mb-6 relative">
+                            <img id="imagePreview" src="" class="w-full h-full object-cover">
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2 truncate">
+                                <i class="fas fa-file-image text-blue-500"></i>
+                                <span id="fileName" class="text-xs font-bold text-slate-600 truncate max-w-[150px]"></span>
+                            </div>
+                            <button id="clearBtn" class="text-[10px] font-black text-red-500 hover:underline uppercase tracking-widest">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action: Analyze Image Button (Always at bottom of card) -->
+                    <div class="mt-auto">
+                        <button id="predictBtn" class="btn-primary" disabled title="Select an image to analyze">
+                            <span id="btnText">Analyze Image</span>
+                            <span id="btnLoader" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        </button>
+                    </div>
+
+                    <div class="mt-8 pt-8 border-t border-slate-100">
+                        <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Diagnostic Information</h4>
+                        <ul class="space-y-3 text-xs text-slate-500">
+                            <li class="flex gap-3 items-start"><i class="fas fa-microscope text-blue-500 mt-0.5"></i> EfficientNetB3 Neural Engine</li>
+                            <li class="flex gap-3 items-start"><i class="fas fa-file-medical text-blue-500 mt-0.5"></i> DICOM / JPG / PNG Compliant</li>
+                            <li class="flex gap-3 items-start"><i class="fas fa-eye text-blue-500 mt-0.5"></i> Grad-CAM XAI Visual Explanations</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Result Analysis Section -->
+            <section class="lg:col-span-8">
+
+                <!-- Empty State -->
+                <div id="emptyState" class="card flex flex-col items-center justify-center py-40 bg-white/50 border-dashed">
+                    <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-notes-medical text-4xl text-slate-300"></i>
+                    </div>
+                    <p class="text-slate-400 font-bold text-xl">Waiting for MRI Scan Upload...</p>
+                    <p class="text-slate-400 text-sm mt-2">The results of the AI analysis will be displayed here.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="card hidden flex flex-col items-center justify-center py-40">
+                    <div class="spinner mb-8"></div>
+                    <p class="text-slate-700 font-black text-2xl tracking-tight">Analyzing MRI Image...</p>
+                    <p class="text-slate-400 text-sm mt-3">Identifying pathology and computing Grad-CAM heatmap.</p>
+                </div>
+
+                <!-- Success State: Result Analysis -->
+                <div id="resultsContainer" class="hidden space-y-8">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-2xl font-black text-slate-800">Result Analysis</h2>
+                            <span id="resultTimestamp" class="text-[11px] font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full"></span>
+                        </div>
+
+                        <!-- Prediction -->
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-2 uppercase text-[10px] font-black text-slate-400 tracking-widest">
+                                <i class="fas fa-search text-blue-500"></i> Classification
+                            </div>
+
+                            <div id="predictedClassLabel" class="prediction-header-box">--</div>
+
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-end">
+                                    <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Confidence Score</span>
+                                    <span id="confidenceScore" class="text-2xl font-black text-blue-600">0%</span>
+                                </div>
+                                <div class="custom-progress-container">
+                                    <div id="progressFill" class="custom-progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grid -->
+                        <div class="mt-12 pt-8 border-t border-slate-100">
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-chart-pie text-indigo-500"></i> Detailed Probability Breakdown
+                            </h3>
+                            <div id="confidenceScores" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Dynamic JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medical Content matched to Screenshot 071752 -->
+                    <div id="tumorInfoBox" class="card tumor-info-box space-y-10">
+                        <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
+                            <i class="fas fa-notes-medical text-purple-500"></i> Tumor Information & Health Effects
+                        </h3>
+                        <div id="tumorInfoContent" class="space-y-10">
+                            <!-- Dynamic JS -->
+                        </div>
+                    </div>
+
+                    <!-- Heatmap matched to Screenshot 072529 -->
+                    <div class="card">
+                        <h3 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-6">
+                            <i class="fas fa-brain text-blue-500"></i> Grad-CAM Explanation
+                        </h3>
+
+                        <div class="explanation-callout mb-8">
+                            The <span class="font-bold">heatmap below</span> shows which regions of the MRI image contributed <span class="font-bold">most</span> to the prediction. Warmer colors (red/yellow) indicate areas the model focused on.
+                        </div>
+
+                        <div class="bg-slate-900 rounded-xl overflow-hidden aspect-square flex items-center justify-center mb-10 border-4 border-slate-50 shadow-2xl">
+                            <img id="gradcamImage" src="" alt="Grad-CAM" class="w-full h-full object-contain">
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button id="downloadResultBtn" class="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-4 rounded-xl border border-slate-200 flex items-center justify-center gap-2 transition-all">
+                                <i class="fas fa-file-pdf text-red-500"></i> Download Report
+                            </button>
+                            <button id="newAnalysisBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all">
+                                <i class="fas fa-plus"></i> New Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-12 text-center">
+        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em]">🏥 NeuroScan AI Diagnostic Clinical Support</p>
+    </footer>
+
+    <script>
+        const MEDICAL_INFO_KB = {
+            "meningioma_tumor": {
+                name: "Meningioma Tumor",
+                severity: "Medium",
+                description: "Meningiomas are tumors arising from the dura mater and arachnoid membrane that surround and protect the brain and spinal cord. Most are benign but can be serious due to compression of brain tissue.",
+                characteristics: "Typically slow-growing - Usually benign (80-90%) - Can compress brain tissue - May affect cerebrospinal fluid circulation",
+                symptoms: ["Headaches", "Vision problems (double or blurred)", "Hearing loss (ringing in ears)", "Weakness in legs or arms", "Seizures", "Balance and coordination problems", "Personality or behavioral changes"],
+                causes: ["Unknown primary cause", "Possible radiation exposure history", "Hormonal factors (more common in women)", "Genetic syndromes (neurofibromatosis type 2)"],
+                effects: ["Brain compression and swelling", "Impaired cognitive function", "Motor and sensory deficits", "Hydrocephalus (fluid accumulation)", "Quality of life impacts", "Generally better outcomes than gliomas"],
+                treatment: ["Surgical resection (primary treatment)", "Radiation therapy if surgery incomplete", "Observation (for slow-growing benign tumors)", "Chemotherapy (rare)", "Stereotactic radiosurgery"],
+                prognosis: "Generally favorable for benign meningiomas. 5-year survival rate: 85-90%. Malignant meningiomas have poorer outcomes.",
+                urgency: "URGENCY LEVEL: URGENT - Requires neurosurgical consultation and treatment planning"
+            },
+            "glioma_tumor": {
+                name: "Glioma Tumor",
+                severity: "High",
+                description: "Gliomas are tumors that start in the glial cells (supportive cells) of the brain or spine. They are often aggressive and can infiltrate surrounding healthy brain tissue rapidly.",
+                symptoms: ["Progressive headaches", "Nausea and vomiting", "Confusion or memory loss", "Difficulty with balance", "Speech difficulties", "Personality changes"],
+                causes: ["Genetic mutations", "Environmental factors", "Ionizing radiation exposure", "Age factors"],
+                effects: ["High intracranial pressure", "Permanent neurological damage", "Significant cognitive impairment", "Rapid physical decline"],
+                treatment: ["Aggressive surgical resection", "Radiation therapy", "Chemotherapy (Temozolomide)", "Targeted drug therapy"],
+                prognosis: "Prognosis depends on grade (I-IV). Glioblastoma (Grade IV) remains very challenging with a median survival of 15-18 months.",
+                urgency: "URGENCY LEVEL: CRITICAL - Immediate neurological intervention required"
+            },
+            "pituitary_tumor": {
+                name: "Pituitary Tumor",
+                severity: "Medium",
+                description: "Pituitary tumors are abnormal growths that develop in your pituitary gland. Some result in too much of the hormones that regulate important functions of your body.",
+                symptoms: ["Vision loss (peripheral)", "Hormonal imbalances", "Unexplained fatigue", "Weight changes", "Nipple discharge", "Acromegaly symptoms"],
+                causes: ["Multiple endocrine neoplasia (MEN1)", "Genetic predisposition", "Spontaneous mutations"],
+                effects: ["Hormonal disorders", "Vision impairment", "Pituitary apoplexy (emergency bleeding)"],
+                treatment: ["Endoscopic transsphenoidal surgery", "Hormone replacement therapy", "Medication to shrink tumor", "Radiation"],
+                prognosis: "Highly treatable. Most are non-cancerous (adenomas) and patients live normal lifespans with managed hormones.",
+                urgency: "URGENCY LEVEL: ELEVATED - Requires endocrinology and neurosurgical review"
+            },
+            "no_tumor": {
+                name: "No Tumor Detected",
+                severity: "Low",
+                description: "The AI analysis indicates a healthy brain scan with no significant masses, lesions, or tumors detected within the provided image parameters.",
+                symptoms: ["N/A"],
+                causes: ["N/A"],
+                effects: ["Healthy physiological brain function"],
+                treatment: ["Routine check-ups as recommended by physician"],
+                prognosis: "Excellent clinical outlook regarding tumor pathology.",
+                urgency: "URGENCY LEVEL: ROUTINE - No immediate oncology intervention required"
+            }
+        };
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const predictBtn = document.getElementById('predictBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadView = document.getElementById('uploadView');
+        const previewView = document.getElementById('previewView');
+        const emptyState = document.getElementById('emptyState');
+        const loadingState = document.getElementById('loadingState');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        let currentData = null;
+
+        uploadArea.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').innerText = file.name;
+                uploadView.classList.add('hidden');
+                previewView.classList.remove('hidden');
+                predictBtn.disabled = false;
+                predictBtn.removeAttribute('title');
+
+                const reader = new FileReader();
+                reader.onload = (event) => imagePreview.src = event.target.result;
+                reader.readAsDataURL(file);
+            }
+        };
+
+        const resetUI = () => {
+            fileInput.value = "";
+            uploadView.classList.remove('hidden');
+            previewView.classList.add('hidden');
+            predictBtn.disabled = true;
+            predictBtn.setAttribute('title', 'Select an image to analyze');
+            emptyState.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+            resultsContainer.classList.add('hidden');
+            currentData = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        clearBtn.onclick = resetUI;
+        document.getElementById('newAnalysisBtn').onclick = resetUI;
+
+        predictBtn.onclick = async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            emptyState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+
+            predictBtn.disabled = true;
+            document.getElementById('btnText').innerText = "Processing...";
+            document.getElementById('btnLoader').classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/predict', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error);
+
+                currentData = result;
+
+                let info = MEDICAL_INFO_KB[result.predicted_class] || MEDICAL_INFO_KB[result.predicted_class.toLowerCase()];
+                try {
+                    const infoRes = await fetch(`/api/tumor-info/${result.predicted_class}`);
+                    if (infoRes.ok) {
+                        const backInfo = await infoRes.json();
+                        if (backInfo.description || backInfo.detailed_description) info = backInfo;
+                    }
+                } catch(e) {}
+
+                renderOutput(result, info);
+
+                loadingState.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                alert("Error during scan analysis: " + err.message);
+                resetUI();
+            } finally {
+                predictBtn.disabled = false;
+                document.getElementById('btnText').innerText = "Analyze Image";
+                document.getElementById('btnLoader').classList.add('hidden');
+            }
+        };
+
+        function renderOutput(data, info) {
+            document.getElementById('resultTimestamp').innerText = new Date(data.timestamp).toLocaleString();
+            document.getElementById('predictedClassLabel').innerText = data.predicted_class.replace(/_/g, ' ').toUpperCase();
+            document.getElementById('confidenceScore').innerText = data.confidence + '%';
+            document.getElementById('progressFill').style.width = data.confidence + '%';
+            document.getElementById('gradcamImage').src = data.gradcam;
+
+            const grid = document.getElementById('confidenceScores');
+            grid.innerHTML = '';
+            Object.entries(data.confidence_scores).forEach(([cls, val]) => {
+                const item = document.createElement('div');
+                item.className = 'score-card';
+                item.innerHTML = `
+                    <span class="text-[11px] font-black text-slate-400 uppercase tracking-tight">${cls.replace(/_/g, ' ')}</span>
+                    <span class="text-sm font-black text-blue-600">${val}%</span>
+                `;
+                grid.appendChild(item);
+            });
+
+            const infoContainer = document.getElementById('tumorInfoContent');
+            if (info) {
+                const sevColor = info.severity === 'High' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-orange-50 text-orange-700 border-orange-200';
+
+                infoContainer.innerHTML = `
+                    <div class="px-4 py-2 rounded-full inline-block font-black text-[11px] uppercase border ${sevColor}">Severity: ${info.severity}</div>
+
+                    <div class="bg-purple-50 p-8 rounded-2xl border border-purple-100">
+                        <h4 class="font-bold text-purple-900 mb-3 text-lg">${info.name}</h4>
+                        <p class="text-sm text-purple-800 font-medium leading-relaxed">
+                            ${info.detailed_description || info.description || ''}
+                            ${info.characteristics ? `<br><br><strong>Characteristics:</strong> ${info.characteristics}` : ''}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <h4 class="text-blue-600 font-black text-[11px] uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-stethoscope"></i> Symptoms
+                            </h4>
+                            <ul class="bullet-list">${(info.symptoms || []).map(s => `<li>${s}</li>`).join('')}</ul>
+                        </div>
+                        <div>
+                            <h4 class="text-blue-600 font-black text-[11px] uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-dna"></i> Root Causes
+                            </h4>
+                            <ul class="bullet-list">${(info.causes || []).map(c => `<li>${c}</li>`).join('')}</ul>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <h4 class="text-red-500 font-black text-[11px] uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-heart-broken"></i> Health Effects
+                            </h4>
+                            <ul class="bullet-list">${(info.effects_on_health || info.effects || []).map(e => `<li>${e}</li>`).join('')}</ul>
+                        </div>
+                        <div>
+                            <h4 class="text-orange-500 font-black text-[11px] uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-pills"></i> Treatment Options
+                            </h4>
+                            <ul class="bullet-list">${(info.treatment_options || info.treatment || []).map(t => `<li>${t}</li>`).join('')}</ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <h4 class="text-slate-400 font-black text-[11px] uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <i class="fas fa-clipboard-list"></i> Prognosis
+                        </h4>
+                        <p class="text-sm italic text-slate-600 leading-relaxed font-medium">${info.prognosis || 'N/A'}</p>
+                    </div>
+
+                    <div class="urgency-banner">
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                        <span class="text-sm uppercase tracking-tight">${info.urgency || 'URGENT - Consultation Required'}</span>
+                    </div>
+                `;
+            }
+        }
+
+        document.getElementById('downloadResultBtn').onclick = async () => {
+            if (!currentData) return;
+            const btn = document.getElementById('downloadResultBtn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating Report...';
+            try {
+                const response = await fetch('/api/generate-pdf-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentData)
+                });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Diagnostic_Report_${Date.now()}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            } catch (err) { alert("Download failed"); }
+            finally { btn.innerHTML = original; }
+        };
+
+        function handleLogout() {
+            if (confirm("Log out of current session?")) window.location.href = "{{ url_for('serve_login') }}";
+        }
+    </script>
+</body>
+</html>

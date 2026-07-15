@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroVision Dashboard - Brain Tumor Prediction</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            margin: 0;
+        }
+
+        /* --- UPDATED NAVBAR STYLES MATCHED TO CANVAS --- */
+        .navbar {
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-link-custom {
+            color: #495057;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            padding: 4px 12px;
+        }
+
+        .nav-link-custom:hover { color: #007bff; }
+        .active-nav { color: #007bff !important; font-weight: 700; }
+
+        /* --- DASHBOARD COMPONENTS --- */
+        .glass-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f1f5f9;
+        }
+
+        .btn-blue {
+            background-color: #1d4ed8;
+            color: white;
+            transition: all 0.2s;
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-blue:hover {
+            background-color: #1e40af;
+            transform: translateY(-1px);
+        }
+        /* Live Indicator Animation from Canvas */
+        .live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #bbf7d0;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- DATA BRIDGE: Using simple hidden inputs to avoid 500 errors -->
+    <input type="hidden" id="data-glioma" value="{{ stats.glioma_tumor if stats else 0 }}">
+    <input type="hidden" id="data-meningioma" value="{{ stats.meningioma_tumor if stats else 0 }}">
+    <input type="hidden" id="data-no-tumor" value="{{ stats.no_tumor if stats else 0 }}">
+    <input type="hidden" id="data-pituitary" value="{{ stats.pituitary_tumor if stats else 0 }}">
+
+    <!-- UPDATED Top Navigation Bar MATCHED TO CANVAS -->
+    <nav class="navbar px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-100 cursor-pointer" onclick="window.location.href='/'">
+                <img src="https://img.freepik.com/premium-photo/3d-rendered-medically-accurate-illustration-brain-glow_116317-10116.jpg" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-xl font-bold text-slate-700 tracking-tight">Brain Tumor Prediction</h1>
+
+            <div class="hidden md:flex items-center ml-8 space-x-6">
+                <a href="/dashboard" class="nav-link-custom active-nav">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/preview" class="nav-link-custom">
+                    <i class="fas fa-brain"></i> Predict
+                </a>
+                <a href="/about" class="nav-link-custom">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+                <a href="/profile" class="nav-link-custom">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="live-pill">
+                <span class="pulse-dot"></span> LIVE SYNC
+            </div>
+            <button onclick="window.location.href='/login'" class="text-slate-400 hover:text-red-500 transition-colors">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-screen-2xl mx-auto p-8">
+
+        <div class="mb-10 flex justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-extrabold text-slate-800">
+                    Welcome, <span id="ui-name">{{ username if username and '{' not in username else 'Aman' }}</span>
+                </h2>
+                <p class="text-slate-500 font-medium">NeuroVision Lifecycle Diagnostics</p>
+            </div>
+            <a href="/preview" class="btn-blue shadow-lg shadow-blue-100">
+                <i class="fas fa-plus mr-2"></i> New Scan
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- Left Side: Lifetime Stats -->
+            <div class="lg:col-span-8 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 border-l-4 border-blue-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Scans</p>
+                        <h3 class="text-3xl font-black text-slate-800">{{ total if total and '{' not in total|string else 0 }}</h3>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-green-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Model Accuracy</p>
+                        <h3 class="text-3xl font-black text-slate-800">94.60%</h3>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-amber-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                        <h3 class="text-2xl font-bold text-green-600">OPTIMAL</h3>
+                    </div>
+                </div>
+
+                <!-- Distribution Chart -->
+                <div class="glass-card p-8">
+                    <h3 class="text-xl font-bold text-slate-800 mb-8">Lifetime Classification Distribution</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                        <div class="relative flex justify-center">
+                            <canvas id="distChart" class="max-w-[260px] max-h-[260px]"></canvas>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="text-sm font-semibold">Glioma</span>
+                                <span class="font-bold">{{ stats.glioma_tumor if stats else 0 }}</span>
+                            </div>
+                            <div class="flex justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="text-sm font-semibold">Meningioma</span>
+                                <span class="font-bold">{{ stats.meningioma_tumor if stats else 0 }}</span>
+                            </div>
+                            <div class="flex justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="text-sm font-semibold">No Tumor</span>
+                                <span class="font-bold">{{ stats.no_tumor if stats else 0 }}</span>
+                            </div>
+                            <div class="flex justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="text-sm font-semibold">Pituitary</span>
+                                <span class="font-bold">{{ stats.pituitary_tumor if stats else 0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: History -->
+            <div class="lg:col-span-4">
+                <div class="glass-card p-6 h-full min-h-[500px]">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center justify-between">
+                        <span>Recent History</span>
+                        <i class="fas fa-history text-slate-200"></i>
+                    </h3>
+
+                    <div class="space-y-4">
+                        {% if activities %}
+                            {% for scan in activities %}
+                            <div class="p-4 rounded-xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 transition">
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 truncate">{{ scan.predicted_class|replace('_', ' ')|upper }}</h4>
+                                    <p class="text-[10px] text-slate-400 font-medium">{{ scan.timestamp }}</p>
+                                </div>
+                                <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded">#{{ scan.id }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-20">
+                                <p class="text-slate-400 italic">No historical records found.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest bg-gray-50 border-t" style="background-color: #f1f3f5; color: #495057;">
+        <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+        <p>⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+    </footer>
+
+    <script>
+        const g = parseInt(document.getElementById('data-glioma').value) || 0;
+        const m = parseInt(document.getElementById('data-meningioma').value) || 0;
+        const n = parseInt(document.getElementById('data-no-tumor').value) || 0;
+        const p = parseInt(document.getElementById('data-pituitary').value) || 0;
+
+        window.onload = () => {
+            const hasData = (g + m + n + p) > 0;
+
+            new Chart(document.getElementById('distChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Glioma', 'Meningioma', 'No Tumor', 'Pituitary'],
+                    datasets: [{
+                        data: hasData ? [g, m, n, p] : [1, 1, 1, 1],
+                        backgroundColor: hasData ? ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0'] : ['#f1f5f9', '#f1f5f9', '#f1f5f9', '#f1f5f9'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { cutout: '80%', plugins: { legend: { display: false } } }
+            });
+        };
+    </script>
+</body>
+</html>
